@@ -1,0 +1,15 @@
+问题描述：
+    如果执行make run之后，在terminal中键入q，则会导致以下报错信息：make: *** [/home/ubuntu/ics2021/nemu/scripts/native.mk:23: run] Error 1.
+
+尝试fix上述错误信息。
+1.报错信息输出时，正在执行cpu-exec.c中cpu_exec(uint64_t n) .
+  cpu_exec根据参数 n 的值设置全局变量 g_print_step(bool型).
+  然后，它检查全局变量 nemu_state.state 的值。如果其值为 NEMU_END 或 NEMU_ABORT，则打印一条消息并返回；否则将其设置为 NEMU_RUNNING.
+  接下来，它记录当前时间并定义一个名为 s 的 Decode 类型的变量。
+  然后进入一个循环，循环次数为 n。
+  在循环体中，它调用函数 fetch_decode_exec_updatepc()、更新全局变量 g_nr_guest_instr、调用函数 trace_and_difftest() 并检查全局变量 nemu_state.state 的值。
+  如果其值不为 NEMU_RUNNING，则跳出循环。最后，在循环体末尾调用函数 device_update()（如果定义了宏 CONFIG_DEVICE）。
+  在循环结束后，它再次记录当前时间并更新全局变量 g_timer。然后再次检查全局变量 nemu_state.state 的值。
+  如果其值为 NEMU_RUNNING，则将其设置为 NEMU_STOP；如果其值为 NEMU_END 或 NEMU_ABORT，则调用宏 Log() 打印一条消息；
+  如果其值为 NEMU_QUIT，则调用函数 statistic()。
+
