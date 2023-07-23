@@ -1,0 +1,23 @@
+#配置系统kconfig
+1.make menuconfig命令：检查nemu/tools/kconfig/build/mconf程序是否存在, 若不存在, 则编译并生成mconf；检查nemu/tools/kconfig/build/conf程序是否存在, 若不存在, 则编译并生成conf.
+2.mconf nemu/Kconfig命令：mconf将会解析nemu/Kconfig中的描述, 以菜单树的形式展示各种配置选项, 供开发者进行选择，退出菜单时, mconf会把开发者选择的结果记录到nemu/.config文件中.
+3.conf --syncconfig nemu/Kconfig命令： 此时conf将会解析nemu/Kconfig中的描述, 并读取选择结果nemu/.config, 结合两者来生成如下文件:
+  可以被包含到C代码中的宏定义(nemu/include/generated/autoconf.h), 这些宏的名称都是形如CONFIG_xxx的形式；
+  可以被包含到Makefile中的变量定义(nemu/include/config/auto.conf)；
+  可以被包含到Makefile中的, 和"配置描述文件"相关的依赖规则(nemu/include/config/auto.conf.cmd), 为了阅读代码, 我们可以不必关心它；
+  通过时间戳来维护配置选项变化的目录树nemu/include/config/, 它会配合另一个工具nemu/tools/fixdep来使用, 用于在更新配置选项后节省不必要的文件编译.
+#Makefile功能
+1.与配置系统关联：通过包含nemu/include/config/auto.conf, 与kconfig生成的变量进行关联. 
+2.通过文件列表决定最终参与的源文件.在nemu/src及其子目录下存在一些名为filelist.mk的文件, 它们会根据menuconfig的配置对如下4个变量进行维护:
+  SRCS-y - 参与编译的源文件的候选集合
+  SRCS-BLACKLIST-y - 不参与编译的源文件的黑名单集合
+  DIRS-y - 参与编译的目录集合, 该目录下的所有文件都会被加入到SRCS-y中
+  DIRS-BLACKLIST-y - 不参与编译的目录集合, 该目录下的所有文件都会被加入到SRCS-BLACKLIST-y中
+#编译和链接
+1.Makefile的编译规则,指定了如何从.c文件生成.o文件：
+                     $(OBJ_DIR)/%.o: %.c (目标是$(OBJ_DIR)/%.o,在$(OBJ_DIR)目录下的任意一个.o文件。它的依赖是%.c，表示与目标文件同名但扩展名为.c的文件)
+                     @echo + CC $<  (打印出编译信息，其中$<表示第一个依赖文件，即对应的.c文件)
+                     @mkdir -p $(dir $@) (创建目标文件所在的目录，其中$@表示目标文件，$(dir $@)表示目标文件所在的目录)
+                     @$(CC) $(CFLAGS) -c -o $@ $< (编译.c文件生成.o文件，其中$(CC)表示编译器，$(CFLAGS)表示编译选项，$@表示目标文件，$<表示第一个依赖文件)
+                     $(call call_fixdep, $(@:.o=.d), $@) (调用函数call_fixdep，参数为$(@:.o=.d)和$@。call_fixdep的调用用于生成更合理的依赖关系)
+
