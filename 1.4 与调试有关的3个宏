@@ -1,0 +1,33 @@
+#define Log(format, ...) \
+    _Log(ASNI_FMT("[%s:%d %s] " format, ASNI_FG_BLUE) "\n", \
+        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+    功能:Log接受至少一个参数 format 和可选的可变参数 ...。
+        当调用这个宏时，它会调用一个名为 _Log 的函数，并传入格式化后的字符串和可变参数。格式化字符串包括文件名（__FILE__）、行号（__LINE__）、函数名（__func__）
+        以及用户提供的格式化字符串 format。所有这些信息都将被格式化为蓝色文本。
+        结合第二行调用的宏_Log来看，当调用 Log 宏时，它会先格式化字符串，然后调用 _Log 宏将格式化后的字符串传递给 printf 和 log_write 函数。这样就可以在控制台和日志文件中同时打印日志消息。
+
+#define Assert(cond, format, ...) \
+  do { \
+    if (!(cond)) { \
+      MUXDEF(CONFIG_TARGET_AM, printf(ASNI_FMT(format, ASNI_FG_RED) "\n", ## __VA_ARGS__), \
+        (fflush(stdout), fprintf(stderr, ASNI_FMT(format, ASNI_FG_RED) "\n", ##  __VA_ARGS__))); \
+      extern void assert_fail_msg(); \
+      assert_fail_msg(); \
+      assert(cond); \
+    } \
+  } while (0)
+
+  功能：Assert接受至少两个参数：cond 和 format，以及可选的可变参数 ...。
+       这个宏使用了一些技巧来实现多行代码和条件编译。例如，它使用了反斜杠 \ 来将多行代码连接成一行，并使用了 do { ... } while (0) 来包装代码块，以便在调用宏时可以像调用函数一样使用分号结尾。此外，它还使用了三目运算符 ?: 来实现条件编译。
+       当 cond 为假时，它会执行以下操作：
+       如果 CONFIG_TARGET_AM 已定义，则调用 printf 函数打印红色的错误信息，否则刷新 stdout 并使用 fprintf 函数在 stderr 上打印红色的错误信息。
+       调用外部函数 assert_fail_msg()。
+       调用标准库函数 assert() 并传入 cond 作为参数。
+       如果 cond 为真，则不执行任何操作。
+  对第二个参数format的补充说明：void format(llvm::raw_ostream &S, StringRef Options) override {format_provider<std::decay_t<T>>::format(Item, S, Options);}
+  =》format函数重写了基类中的虚函数。接受两个参数：一个 llvm::raw_ostream 类型的引用 S 和一个 StringRef 类型的值 Options。
+  =》format函数调用了一个名为 format_provider 的模板类的静态成员函数 format，并传入了三个参数：Item、S 和 Options。其中，Item 是一个未在这段代码中定义的变量，它的类型为 std::decay_t<T>。
+
+      
+
+#define panic(format, ...) Assert(0, format, ## __VA_ARGS__)
