@@ -12,4 +12,11 @@
   在循环结束后，它再次记录当前时间并更新全局变量 g_timer。然后再次检查全局变量 nemu_state.state 的值。
   如果其值为 NEMU_RUNNING，则将其设置为 NEMU_STOP；如果其值为 NEMU_END 或 NEMU_ABORT，则调用宏 Log() 打印一条消息；
   如果其值为 NEMU_QUIT，则调用函数 statistic()。
+2.出现问题的函数：int is_exit_status_bad() {
+  int good = (nemu_state.state == NEMU_END && nemu_state.halt_ret == 0) ||
+    (nemu_state.state == NEMU_QUIT);
+  return !good;
+}
+  把return修改为good即可。
+
 
