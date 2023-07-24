@@ -18,5 +18,6 @@
   return !good;
 }
   把return修改为good即可。
+3.步骤2完成以后，打开gdb测试，run之后，输入‘q’，输出[Inferior 1 (process 19601) exited with code 01]，返回值为1，正确返回，程序优雅退出。
 
 
