@@ -1,0 +1,20 @@
+1. 单步执行功能
+   创建一个static int cmd_si(char *args)函数，从命令行读入类似“si 5”这样的命令，经过sdb_mainloop()函数读取，首先匹配到“si”，调用cmd_si(char *args)函数，
+   在cmd_si(char *args)函数内部，*args为字符串后携带的参数，也就是需要单步执行的命令数（默认1），作为参数传入“nemu/src/cpu/cpu-exec.c”中定义的cpu_exec()函数。
+2. 打印寄存器
+  可以调用的函数存在于：“nemu/src/isa/$ISA/reg.c”中，void isa_reg_display(void);首先需要完善函数内部的功能。文件内部已经定义了
+  const char *regs[] = {
+    "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+    "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+    "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+    "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
+3. 打印监视点
+   #define NR_WP 32
+   typedef struct watchpoint
+   {
+     int NO;
+     struct watchpoint *next;
+   } WP;
+   static WP wp_pool[NR_WP] = {};
+   static WP *head = NULL, *free_ = NULL;
+   添加一个函数void print_wp_pool()，从头节点开始，printf每个节点的信息，并在cmd_info(char *args)中调用。
