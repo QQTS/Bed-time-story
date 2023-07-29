@@ -1,0 +1,12 @@
+1.token结构体
+  typedef struct token {
+  int type;  //token类型
+  char str[32]; //如果token是个数值，则记录在str数组中
+} Token;
+
+2.静态变量：
+  static Token tokens[32] __attribute__((used)) = {};
+  //名为 tokens 的 Token 类型数组，数组长度为 32。static 关键字表示这个变量是静态的，它的生命周期与程序的运行时间相同。
+  //__attribute__((used)) 是一个 GCC 特有的属性，用于告诉编译器这个变量即使没有被引用也不要删除它。= {} 表示将数组初始化为空。
+  static int nr_token __attribute__((used)) = 0;
+  //为 nr_token 的整型变量，并将其初始化为 0。这个变量也是静态的，并且具有 __attribute__((used)) 属性。
