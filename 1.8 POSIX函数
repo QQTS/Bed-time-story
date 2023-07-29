@@ -1,0 +1,6 @@
+POSIX 正则表达式函数是一组用于处理正则表达式的函数。它们遵循 POSIX 规范，与常用的正则表达式不完全相同。POSIX 正则表达式函数包括 regcomp、regexec、regerror 和 regfree 等。
+
+regcomp 函数用于编译正则表达式，以便 regexec 函数使用。它接受一个 regex_t 类型的指针 preg，一个描述正则表达式的字符串 regex，以及一个决定编译类型的整型参数 cflags。其中，regex_t 是一个结构体数据类型，用来存放编译后的正则表达式。
+regexec 函数用于根据编译好的正则表达式对字符串进行匹配。它接受一个经过 regcomp 编译的正则表达式 preg，一个待匹配的字符串 string，以及其他一些参数。
+regerror 函数用于将 regcomp 和 regexec 返回的错误码转换成错误信息。
+regfree 函数用于释放由 regcomp 编译的正则表达式占用的内存。
