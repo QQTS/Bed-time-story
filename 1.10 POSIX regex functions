@@ -62,6 +62,7 @@ bool make_token(char *e)
   int position = 0;
   int i;
   regmatch_t pmatch;
+  //regmatch_t定义在regex.h中,其中的rm_so 存放匹配文本串在目标串中的开始位置，rm_eo 存放结束位置(Byte offset)
 
   nr_token = 0;
 
@@ -70,6 +71,16 @@ bool make_token(char *e)
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i++)
     {
+      //regexec函数原型：int regexec(const regex_t *preg, const char *string, size_t nmatch,regmatch_t pmatch[], int eflags);
+      //参数：　
+      //   preg：已经用regcomp函数编译好的正则表达式,也就是re[i]
+      //   string：在命令行中输入的需要被比较的文本串，即e + position
+　　  //   nmatch：regmatch_t结构体数组的长度=1
+　　  //   matchptr：regmatch_t类型的结构体数组，存放匹配文本串的位置信息。
+　　  //   eflags 有两个值:
+    　//       REG_NOTBOL 让特殊字符^无作用
+      //       REG_NOTEOL 让特殊字符＄无作用
+      //所以if匹配了传入的字符串和预编译的规则，记录匹配的起始和终止位置，最终还需要判断起始位置==0
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0)
       {
         char *substr_start = e + position;
@@ -77,6 +88,8 @@ bool make_token(char *e)
 
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
+
+       //void regfree(regex_t *preg)可以来清空regex_t结构体的内容
 
         position += substr_len;
 
