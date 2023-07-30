@@ -1,0 +1,120 @@
+#include <regex.h>
+enum
+{
+  TK_NOTYPE = 256,
+  TK_EQ,
+};
+
+static struct rule
+{
+  const char *regex;
+  int token_type;
+} rules[] = {
+    {" +", TK_NOTYPE}, // spaces
+    {"\\+", '+'},      // plus
+    {"==", TK_EQ},     // equal
+};
+
+#define NR_REGEX ARRLEN(rules)
+
+static regex_t re[NR_REGEX] = {};
+
+/* Rules are used for many times.
+ * Therefore we compile them only once before any usage.
+ */
+void init_regex()
+{
+  int i;
+  char error_msg[128];
+  int ret;
+
+  for (i = 0; i < NR_REGEX; i++)
+  {
+    //原型：int regcomp(regex_t *preg, const char *regex, int cflags);
+    //re[i]指向的是regex_t结构体类型，用来存放编译后的正则表达式，结构体内re_nsub用来存储Number of subexpressions found by the compiler
+    //参数rules[i].regex：指向我们写好的正则表达式的指针，具体就是指向" +"等提前定义的规则。
+    //参数cflags包括:
+    //  REG_EXTENDED(以功能更加强大的扩展正则表达式的方式进行匹配)
+    //  REG_ICASE(匹配字母时忽略大小写)
+    //  REG_NOSUB(不用存储匹配后的结果,只返回是否成功匹配。如果设置该标志位，那么在regexec（在下边介绍）将忽略nmatch和pmatch两个参数)
+    //  REG_NEWLINE(识别换行符，这样'$'就可以从行尾开始匹配，'^'就可以从行的开头开始匹配)
+    ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
+  
+    if (ret != 0)
+    {
+      regerror(ret, &re[i], error_msg, 128);
+      panic("regex compilation failed: %s\n%s", error_msg, rules[i].regex);
+    }
+  }
+}
+
+typedef struct token
+{
+  int type;
+  char str[32];
+} Token;
+
+static Token tokens[32] __attribute__((used)) = {};
+static int nr_token __attribute__((used)) = 0;
+
+bool make_token(char *e)
+{
+  int position = 0;
+  int i;
+  regmatch_t pmatch;
+
+  nr_token = 0;
+
+  while (e[position] != '\0')
+  {
+    /* Try all rules one by one. */
+    for (i = 0; i < NR_REGEX; i++)
+    {
+      if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0)
+      {
+        char *substr_start = e + position;
+        int substr_len = pmatch.rm_eo;
+
+        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+
+        position += substr_len;
+
+        /* TODO: Now a new token is recognized with rules[i]. Add codes
+         * to record the token in the array `tokens'. For certain types
+         * of tokens, some extra actions should be performed.
+         */
+
+        switch (rules[i].token_type)
+        {
+        default:
+          TODO();
+        }
+
+        break;
+      }
+    }
+
+    if (i == NR_REGEX)
+    {
+      printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+word_t expr(char *e, bool *success)
+{
+  if (!make_token(e))
+  {
+    *success = false;
+    return 0;
+  }
+
+  /* TODO: Insert codes to evaluate the expression. */
+  TODO();
+
+  return 0;
+}
