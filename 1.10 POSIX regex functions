@@ -36,7 +36,7 @@ void init_regex()
     //参数cflags包括:
     //  REG_EXTENDED(以功能更加强大的扩展正则表达式的方式进行匹配)
     //  REG_ICASE(匹配字母时忽略大小写)
-    //  REG_NOSUB(不用存储匹配后的结果,只返回是否成功匹配。如果设置该标志位，那么在regexec（在下边介绍）将忽略nmatch和pmatch两个参数)
+    //  REG_NOSUB(不用存储匹配后的结果,只返回是否成功匹配。如果设置该标志位，那么在regexec将忽略nmatch和pmatch两个参数)
     //  REG_NEWLINE(识别换行符，这样'$'就可以从行尾开始匹配，'^'就可以从行的开头开始匹配)
     ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
   
